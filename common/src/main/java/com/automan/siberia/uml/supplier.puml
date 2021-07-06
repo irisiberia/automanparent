@@ -1,0 +1,20 @@
+@startuml
+skinparam handwritten true
+participant "退供单生单" as a
+ participant "start" as start
+ participant "Approval" as Approval
+ participant "Processing" as Processing
+ participant "Cancel" as Cancel
+ participant "Finished" as Finished
+a->a :校验是否允许退供、是否有不退供补偿
+a->start:通过校验，状态置为start
+a->Approval:未过校验，状态置为待审批
+
+start->start:退供任任务单结束时，校验退供金额
+start->Approval:未通过检验，状态置为待审批
+start->Processing:通过检验，状态置为待退供
+Approval->Approval:Actor，发送审批流程
+Approval->Processing:通过审批，待退供
+Approval->Cancel:未通过审批，取消
+Processing->Finished:完成退供
+@enduml

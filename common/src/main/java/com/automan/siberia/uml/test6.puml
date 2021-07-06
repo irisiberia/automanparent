@@ -1,0 +1,82 @@
+@startuml
+skinparam handwritten true
+
+actor 上游
+
+box "派案"
+    control 请求接受
+    control 单据生成器
+    control 派案控制器
+    control 校验执行器
+    control 派案执行器
+    database spu明细
+    database sku明细
+    database 请求单
+end box
+
+control 供应链
+
+==== phase 1 提交请求 ====
+上游 -> 请求接受 : 1.1 写入明细
+activate 上游
+activate 请求接受
+请求接受 -\ spu明细 : 写入
+请求接受 -> 上游 : done
+deactivate 请求接受
+上游 -> 请求接受 : 1.2 提交
+activate 请求接受
+请求接受 -\ 单据生成器 : 触发 : 1.3
+请求接受 -> 上游 : done
+deactivate 请求接受
+deactivate 上游
+==== phase 2 任务生成 ====
+
+单据生成器 -\ spu明细 : 2.1 取数
+activate 单据生成器
+单据生成器 -> 单据生成器 : 2.2 生成计算
+activate 单据生成器
+deactivate 单据生成器
+单据生成器 -\ 派案控制器 : 2.3 触发
+单据生成器 -\ 请求单 : 2.4 写入
+deactivate 单据生成器
+
+==== phase 3 派案执行 ====
+
+派案控制器 -\ 请求单 : 3.1 取数
+activate 派案控制器
+派案控制器 -> 校验执行器 : 3.2 执行校验
+activate 校验执行器
+校验执行器 -> 派案控制器 : 3.3 返回校验结果
+deactivate 校验执行器
+
+alt "校验不通过"
+    派案控制器 -\ 请求单 : 3.failure 标记校验失败
+end
+
+派案控制器 -> 派案执行器 : 3.4 执行派案
+activate 派案执行器
+派案执行器 -\ sku明细 : 3.5 写入派案结果
+派案执行器 -> 派案控制器 : 3.6 派案结束
+deactivate 派案执行器
+派案控制器 -\ 请求单 : 3.success 标记派案成功
+
+==== phase 4 下发 ====
+
+派案控制器 -\ sku明细 : 4.1 取数
+派案控制器 -> 供应链 : 4.2 下发供应链
+activate 供应链
+供应链 -> 派案控制器 : 下发成功
+deactivate 供应链
+deactivate 派案控制器
+
+==== phase 5 上游异步反馈 ====
+loop
+    上游 -> 请求接受 : 5.1 询问
+    activate 上游
+    activate 请求接受
+    请求接受 -\ 请求单 : 5.2 取数
+    请求接受 -> 上游 : 5.3 结果
+    deactivate 请求接受
+    deactivate 上游
+end loop
+@enduml

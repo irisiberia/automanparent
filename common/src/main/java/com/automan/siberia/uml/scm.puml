@@ -1,0 +1,27 @@
+@startuml
+skinparam handwritten true
+
+ participant "Http" as http
+ participant "external-booking" as book
+ participant "Inventory" as in
+ participant "open-product" as product
+ database "DB" as DB
+
+== 上传目标库存数 ==
+
+http -> book : 批量上传 商品目标库存数
+book -> DB: 落库
+DB -> book : done
+book -> http :done
+
+== 前端请求 预定量 ==
+http -> book : shop+sku 请求应订货量
+book -> DB :query
+DB -> book : done
+book ->in : 当前库存数
+in -> book : done
+book -> product : 查一堆东西
+product -> book: done
+
+book -> http : 一大波数据甩出来
+@enduml

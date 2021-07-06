@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+          destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${affair.shop.jdbc.url}"/>
+        <property name="username" value="${affair.shop.jdbc.user}"/>
+        <property name="password" value="${affair.shop.jdbc.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${affair.shop.store.druid.minIdle}"/>
+        <property name="minIdle" value="${affair.shop.store.druid.minIdle}"/>
+        <property name="maxActive" value="${affair.shop.store.druid.minIdle}"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${affair.shop.store.druid.maxWait}"/>
+
+        <!--&lt;!&ndash; 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 &ndash;&gt;-->
+        <!--<property name="timeBetweenEvictionRunsMillis" value="${affair.shop.store.druid.timeBetweenEvictionRunsMillis}"/>-->
+
+        <!--&lt;!&ndash; 配置一个连接在池中最小生存的时间，单位是毫秒 &ndash;&gt;-->
+        <!--<property name="minEvictableIdleTimeMillis" value="${affair.shop.store.druid.minEvictableIdleTimeMillis}"/>-->
+
+        <!--<property name="validationQuery" value="SELECT 'x'"/>-->
+        <!--<property name="testWhileIdle" value="true"/>-->
+        <!--<property name="testOnBorrow" value="false"/>-->
+        <!--<property name="testOnReturn" value="false"/>-->
+
+        <!--&lt;!&ndash; 打开PSCache，并且指定每个连接上PSCache的大小 &ndash;&gt;-->
+        <!--<property name="poolPreparedStatements" value="true"/>-->
+        <!--<property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>-->
+
+        <!--<property name="filters" value="filter"/>-->
+        <!--<property name="useGlobalDataSourceStat" value="${affair.shop.store.druid.useGlobalDataSourceStat}"/>-->
+    </bean>
+
+
+    <!-- 创建SqlSessionFactory: spring和MyBatis完美整合，不需要mybatis的配置映射文件-->
+    <bean id="sessionFactory" name="sessionFactory"
+          class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 载入mybatis全局配置文件-->
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:mappers/automan/AlertRecordDao.xml"/>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean id="affairShopMapperScannerConfigurer" name="affairShopMapperScannerConfigurer"
+          class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.automan.myTest"/>
+        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <!--&lt;!&ndash; 声明使用注解式事务 &ndash;&gt;-->
+    <!--<tx:annotation-driven transaction-manager="transactionManager" />-->
+
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+      <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+          <property name="dataSource" ref="dataSource" />
+      </bean>
+</beans>

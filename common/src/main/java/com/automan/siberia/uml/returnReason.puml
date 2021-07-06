@@ -1,0 +1,13 @@
+@startuml
+skinparam handwritten true
+participant "wms" as a
+ participant "wms-core" as b
+ database "DB" as DB
+ == 商品进入退供区 ==
+ a->b:mq
+  activate b
+ b->DB:落库退供原因字段
+ deactivate b
+ ==商品移出退供区==
+b->DB:生成退供单时，记录历史原因
+@enduml

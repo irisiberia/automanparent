@@ -1,0 +1,47 @@
+@startuml
+participant BachOfflineServer
+participant IOT
+participant MS
+
+->BachOfflineServer:商品变更MQ
+activate BachOfflineServer
+BachOfflineServer->BachOfflineServer:入队列等待push
+
+activate BachOfflineServer #FFBBBB
+BachOfflineServer->BachOfflineServer:生成push历史-uuid
+note left BachOfflineServer:生成push历史,生成对应增量内容的uuid
+BachOfflineServer->IOT:发送PUSH消息
+note left BachOfflineServer:发送iot消息时,消息中携带uuid
+
+loop IOT通信ACK失败
+activate IOT
+IOT->MS:IOT消息推送
+activate MS
+MS->IOT:通信ACK
+deactivate IOT
+end
+
+MS->MS:处理IOT消息
+
+alt 业务ACK
+MS->BachOfflineServer:ACK
+deactivate MS
+
+loop MS重复ACK
+note left BachOfflineServer:MS异常情况重复ACK
+BachOfflineServer->BachOfflineServer:判断是否已ACK
+
+group 成功ACK
+BachOfflineServer->BachOfflineServer:未ACK,更改下发消息状态
+note right BachOfflineServer:如果ACK成功过那就不需要再更新下发消息状态
+else 失败ACK
+BachOfflineServer->BachOfflineServer:超过次数限制报警
+note right BachOfflineServer:收到多次业务失败ACK,报警
+end
+BachOfflineServer->BachOfflineServer:记录ACK历史
+end
+end
+
+deactivate BachOfflineServer
+deactivate BachOfflineServer
+@enduml

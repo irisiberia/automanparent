@@ -1,0 +1,41 @@
+@startuml
+
+title 门店断电/恢复
+skinparam handwritten true
+
+control ops
+control affair_shop
+control 蜂利器
+actor 中台
+control 业务方
+
+ref over affair_shop : web/后门
+affair_shop->affair_shop:门店值班创建
+
+ref over affair_shop, 蜂利器 : 蜂利器上报
+蜂利器->affair_shop:店员创建蜂利器工单
+
+ref over ops,affair_shop : ops上报
+ops->ops:捕捉【全店网络异常】/【全店网络异常恢复】
+ops->affair_shop:http通知
+affair_shop->affair_shop:按门店，生成灾难事件(待确认)，不重复生成
+affair_shop->蜂利器:生成蜂利器任务
+蜂利器->中台
+中台->中台:电话核实
+
+== 核实 ==
+
+中台-->蜂利器:确认断电
+蜂利器-->affair_shop
+affair_shop-->affair_shop:灾难事件(待确认->已确认)
+affair_shop->业务方:发送断电mq通知
+affair_shop-->ops:http回执
+
+== 拒绝 ==
+
+中台-->蜂利器:确认并未断电
+蜂利器-->affair_shop
+affair_shop-->affair_shop:灾难事件(待确认->驳回)
+affair_shop-->ops:http回执
+
+@enduml

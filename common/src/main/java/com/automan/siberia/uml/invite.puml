@@ -1,0 +1,19 @@
+@startuml
+skinparam handwritten true
+
+participant "queue" as q
+participant "invite" as i
+participant "push" as p
+
+->q: pickup
+q->i:EVENT_INTERVIEWBEGIN
+i->i:deleteRecallLog
+====
+->q:putdown，有人出坑
+q->i:EVENT_FINISH
+i->p:C端排队召回短信
+====
+->q:tryToEnterRoom
+q->i:EVENT_ENTERROOM
+i->p:B端排队通知
+@enduml

@@ -1,0 +1,1 @@
+package com.automan.siberia.oom;/** * @Author he.zhou * @Date 2020-12-19 */public class MetaspaceOOMTest {    public static class OOMTest {    }    public static void main(String[] args) {    }}

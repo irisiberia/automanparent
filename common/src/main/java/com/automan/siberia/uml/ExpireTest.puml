@@ -1,0 +1,26 @@
+@startuml
+
+start
+:定时任务(每天):同步供应链数据;
+:promotion_date<D+30;陈列存在;过滤大分类；从同步表获取需要记录的sku【定时任务】;
+    :根据sku获取所有批次;
+    :将数据同步到批次表;
+    :生成检查单;
+    :单据记录效期检查批次id,新增门店单据历史表;
+    if(PDA检查批次)then(未检查)
+    :待检查状态;
+    else(已检查)
+    if(是否勾选)then(否)
+    :已检查无此批次;
+    else(是)
+    if(produceDate<D+30)then(ture)
+    :已检查待下架状态;
+    else()
+    :已检查无须处理状态;
+  endif
+endif
+endif
+:结束检查单;
+stop
+
+@enduml

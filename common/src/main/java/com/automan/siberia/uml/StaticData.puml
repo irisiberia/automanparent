@@ -1,0 +1,30 @@
+@startuml
+skinparam handwritten true
+
+ participant "RE" as re
+ participant "BUFFETT" as buffett
+ database "DB" as DB
+
+== re 静态数据拉取==
+buffett ->re:http请求
+activate  re
+re->buffett : 返回全量静态数据
+deactivate re
+activate buffett
+buffett->DB : 查询已有数据
+buffett->buffett : 与全量数据diff
+
+buffett->DB : 如果修改过，更新版本添加新数据
+buffett->DB : 批量新增
+deactivate buffett
+
+==预算查询与注册==
+
+buffett ->re:http请求
+activate  re
+re->buffett :返回数据
+deactivate re
+activate  buffett
+buffett-> DB :记录请求日志
+deactivate buffett
+@enduml

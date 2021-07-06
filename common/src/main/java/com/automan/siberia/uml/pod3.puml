@@ -1,0 +1,138 @@
+
+@startuml
+
+title 差异审批库存处理流程
+
+skinparam sequenceMessageAlign center
+
+actor user
+participant bach_scm_shop_man
+participant bach_scm_shop_core
+participant order_store
+participant bach_inventory
+participant bach_scm_wms_core
+participant bach_scm_data_adapter
+participant bach_buffett
+participant bach_scm_baseinfo_core
+participant wms
+participant bach_affair
+
+
+==pod单完成收货==
+bach_scm_shop_core->bach_scm_shop_core:监听pod收货单完成状态,PodReceiptDataSummaryActor
+alt 如果receipt_qty != picked_up_qty
+bach_scm_shop_core->bach_scm_shop_core:设置pod单据的podDifferenceProcessStatus的状态为waiting_approve
+bach_scm_shop_core->order_store:保存单据
+order_store-->bach_scm_shop_core:保存成功
+bach_scm_shop_core->bach_scm_baseinfo_core:产生差异数update book_particular set adjust_qty = picked_up_qty - receipt_qty where pod_document_id = 19400000
+bach_scm_shop_core-->bach_inventory:处理库存此时的库存数去拿receipt_qty+adjust_qty来加门店可用量科目.
+else 如果receipt_qty == picked_up_qty走现有流程
+end
+==pod单完成收货==
+
+==wms处理开始==
+bach_scm_wms_core->bach_scm_wms_core:监听91单的收货完成状态
+bach_scm_wms_core->bach_scm_shop_core:根据91单查询对应的pod单据 shop-core提供的dubbo接口
+bach_scm_shop_core-->bach_scm_wms_core:返回对应的pod单
+alt 如果当前的pod单的podDifferenceProcessStatus为waiting_approve
+bach_scm_wms_core->bach_scm_wms_core:不发送topic为wormpex.scm.wms.core.receipt.finished.send的消息
+end
+==wms处理结束==
+
+==财务处理开始==
+bach_scm_data_adapter->bach_scm_data_adapter:监听91单收货完成
+bach_scm_data_adapter->bach_buffett:收货数写成receipt_qty + adjust_qty
+==财务处理结束==
+
+==盘点上架之后的流程==
+bach_scm_shop_core->bach_scm_shop_core:当bach_affair系统将对应的91单的某些sku进行库存转移操作，当处理完库存转移的时候将91单的那些完成转移的sku发送出来消息,消息体例如receipt_id_skus
+bach_scm_shop_core->bach_scm_shop_core:监听到91单sku完成库存转移操作的消息.
+bach_scm_shop_core->bach_scm_shop_core:解析消息体,获得那些sku已经完成转移
+bach_scm_shop_core->order_store:查询receipt_id对应的91单实体
+order_store-->bach_scm_shop_core:返回91单实体
+alt 如果当前91单为已经差异审批完成并且审核库存转移状态位为false
+bach_scm_shop_core->bach_scm_baseinfo_core:查询出来对应已经上架完成的并且adjust_qty>0的sku
+bach_scm_baseinfo_core-->bach_scm_shop_core:返回对应的sku
+bach_scm_shop_core->bach_scm_shop_core:过滤出来已经完成转移的sku
+bach_scm_shop_core->bach_inventory:将查询出来的sku组装库存对象,将门店可以用量-adjust_qty，仓库残品不可退供+adjust_qty
+bach_inventory-->bach_scm_shop_core:库存转移成功
+bach_scm_shop_core->bach_scm_shop_core:将已经完成转移的sku写到单据的set中
+bach_scm_shop_core->bach_scm_baseinfo_core:将这些sku的adjust_qty进行清0处理update book_particulars201808 set receipt_id =当前的91单 and sku_code in(当前skucode)
+bach_scm_baseinfo_core-->bach_scm_shop_core:sku清0成功
+alt 如果当前91单对应的有差异的sku已经全部完成库存转移
+bach_scm_shop_core->bach_scm_shop_core:设置91单的审核库存转移状态位为true，表示所有sku都已经完成了库存操作
+bach_scm_shop_core->order_store:保存91单
+order_store->bach_scm_shop_core:保存91单成功
+end
+else 如果当前91单为差异审批拒绝或者审批中直接返回
+end
+==盘点上架之后的流程==
+
+==差异审批搂底task==
+bach_scm_shop_core->order_store:查询审核状态为审批通过的并且全部库存完成转移的(盘点加的一个状态位)并且审核库存转移状态位为false的91单。分页查询
+loop 循环分页查询出来的91单列表
+bach_scm_shop_core->bach_scm_baseinfo_core:查询当前91单所对应有adjust_qty>0的sku,
+bach_scm_baseinfo_core-->bach_scm_shop_core:返回sku list
+bach_scm_shop_core->bach_scm_shop_core:将当前sku和91单上的已经转移的sku流水进行对比，过滤出来那些sku需要进行门店可用量-adjust_qty,仓库残品不可退供 + adjust_qty
+bach_scm_shop_core->bach_scm_shop_core:从单上过滤已经完成转移的sku
+bach_scm_shop_core->bach_inventory:将查询出来的sku组装库存对象,将门店可以用量-adjust_qty，仓库残品不可退供+adjust_qty
+bach_inventory-->bach_scm_shop_core:库存转移成功
+bach_scm_shop_core->bach_scm_baseinfo_core:将这些sku的adjust_qty进行清0处理update book_particulars201808 set receipt_id =当前的91单 and sku_code in(当前skucode)
+bach_scm_baseinfo_core-->bach_scm_shop_core:sku清0成功
+bach_scm_shop_core->bach_scm_shop_core:将完成sku库存转移的sku记录到单上
+alt 如果当前91单对应的有差异的sku已经全部完成库存转移
+bach_scm_shop_core->bach_scm_shop_core:设置91单的审核库存转移状态位为true，表示所有sku都已经完成了库存操作
+bach_scm_shop_core->order_store:保存91单
+order_store->bach_scm_shop_core:保存91单成功
+end
+end
+==差异审批搂底task==
+
+
+==pod转移消息发出节点==
+==case1==
+bach_scm_shop_core->bach_scm_shop_core:监听到pod完成审批actor
+bach_scm_shop_core->order_store:查询91单列表
+loop 循环查询出来的91单列表
+alt 如果当前91单已经完成上架,并且当前91单对应的sku有差异数
+bach_scm_shop_core->bach_scm_shop_core:发送差异库存调整消息,receipt_id + skus
+end
+==case1==
+
+==case2==
+bach_affair->bach_scm_shop_core:上架
+bach_scm_shop_core->bach_inventory:处理库存
+bach_inventory-->bach_scm_shop_core:库存处理成功
+bach_scm_shop_core->bach_scm_shop_core:发送差异库存调整消息receipt_id + skus
+==case2==
+==pod转移消息发出节点==
+
+==wms处理开始==
+bach_scm_wms_core->bach_scm_wms_core:监听到差异审核通过状态或者不通过状态
+bach_scm_wms_core-->bach_scm_wms_core:发送当前pod单对应的配货单id 批量发送 topic wormpex.scm.wms.core.receipt.finished.send
+==wms处理结束==
+
+==财务处理开始==
+bach_scm_data_adapter->bach_scm_data_adapter:监听到差异审核通过状态
+bach_scm_data_adapter->order_store:查询pod所有对应的91单，一个或者多个
+bach_scm_data_adapter->bach_scm_data_adapter:过滤差异数为0的数据
+loop 查询所有的91单
+bach_scm_data_adapter->bach_scm_data_adapter:拼装财务的对象
+bach_scm_data_adapter->bach_buffett:将当前财务数的收货数-adjust_qty
+bach_buffett-->bach_scm_data_adapter:更新成功
+end
+==财务处理结束==
+
+
+==wormpex.scm.wms.core.receipt.finished.send消息之后的流程开始==
+wms->bach_scm_wms_core:PickingUpRemote.queryPickupDataReceiptQty
+bach_scm_wms_core-->order_store:查询配货单
+order_store-->bach_scm_wms_core:返回配货单
+bach_scm_wms_core-->bach_scm_shop_core:查询配货单对应的pod收货单
+alt 如果当前pod的podDifferenceProcessStatus状态为approve
+bach_scm_wms_core-->wms:返回实收数
+else 如果当前pod的podDifferenceProcessStatus状态为reject
+bach_scm_wms_core-->wms:返回配货数
+end
+==wormpex.scm.wms.core.receipt.finished.send消息之后的流程结束==
+@enduml

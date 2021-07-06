@@ -1,0 +1,21 @@
+@startuml
+skinparam handwritten true
+participant "mayun" as a
+participant "buffet" as b
+participant "re" as c
+
+a->a :生成PR单
+
+== 财务BU审批通过 ==
+a->b:回传re预算，状态为在途占用
+b->c:回传re预算
+==PR单审批通过 ==
+a->b:回传re预算，状态为执行
+b->c:回传re预算
+==审批拒绝==
+a->a:判断节点是否在财务BU之前
+
+a->b:否：回传re预算，状态为回退
+b->c:回传re预算
+
+@enduml

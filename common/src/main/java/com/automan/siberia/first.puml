@@ -1,0 +1,142 @@
+
+@startuml
+'==门店设备数==
+'deviceManageController->deviceMangeBiz:查询门店绑定总数
+'deviceMangeBiz->deviceBindHistoryService:门店绑定总数
+'
+'==门店绑定历史==
+'deviceManageController->deviceMangeBiz:查询门店绑定历史
+'deviceMangeBiz->deviceBindHistoryService:门店绑定历史
+'
+'==设备参数查询==
+'deviceManageController->deviceMangeBiz:设备参数查询[shopCode,sn]
+'deviceMangeBiz -> deviceBindService: 设备参数[sn]
+'deviceMangeBiz -> shopService: 门店运营状态[shopCode]
+'deviceBindService -> netbee: dubbo 设备参数
+'shopService -> "baseinfo-shop": dubbo 查询门店
+'
+'==设备绑定==
+'deviceManageController->deviceMangeBiz:设备绑定[shopCode,sn]
+'deviceMangeBiz -> deviceBindService: 设备绑定[shopCode,sn]
+'deviceBindService -> deviceService : 设备信息查询[shopCode,sn]
+'deviceBindService -> netbee: dubbo 设备绑定[shopCode,sn,name,mac,status,type]
+'deviceMangeBiz -> deviceBindHistoryService:门店设备绑定
+'deviceMangeBiz -> bach.baseinfo.goblin:门店设备绑定日志
+'==设备撤回==
+'deviceManageController->deviceMangeBiz:设备撤回[shopCode,sn]
+'deviceMangeBiz -> deviceBindService: 设备撤回[shopCode,sn]
+'deviceMangeBiz -> bach.baseinfo.goblin:门店设备撤回日志
+'deviceBindService -> deviceService : 设备信息查询[shopCode,sn]
+'deviceBindService -> netbee: dubbo 设备撤回[shopCode,sn]
+'deviceMangeBiz -> deviceBindHistoryService:门店设备撤回
+'deviceMangeBiz -> bach.baseinfo.goblin:门店设备撤回日志
+
+'==hiuhiuh==
+' actor Foo1
+'  boundary Foo2
+'  control Foo3
+'  entity Foo4
+'  database Foo5
+'  Foo1 --> Foo2 : To boundary
+'  Foo1 -> Foo3 : To control
+'  Foo1 -> Foo4 : To entity
+'  Foo1 -> Foo5 : To database
+
+ actor Bob #red
+ participant Alice
+ participant "I have a really\nlong name" as L #99ff99
+
+    Alice -> Bob: Authentication Request
+    Bob -> Alice: Authentication Response
+    Bob -> L: Log transaction
+
+ Bob -> Alice
+ activate Alice
+  Bob ->> Alice
+ deactivate Alice
+  Bob -\ Alice
+  Bob \\- Alice
+  Bob //-- Alice
+
+  Bob ->o Alice
+  Bob o\\-- Alice
+
+  Bob <-> Alice
+  Bob <<-\\o Alice
+
+ Alice -> Bob: Authentication Request
+  group as成功case
+  Bob -> Alice:  成功返回
+  end
+
+  group 错误case
+  Bob -> Alice:  失败
+  note left
+   a note
+   end note
+  end
+
+  alt
+    Bob -> Alice: Authentication Accepted
+  else some kind of failure
+    Bob -> Alice: Atuhentication Failue
+'
+'
+'    group My own label
+'      Alice -> Log : Log attack start
+'      loop 1000 times
+'        Alice -> Bob: DNS Attack
+'      end
+'      Alice -> Log : Loag alice end
+'    end
+'  else Another type of failue
+'    Bob -> Alice: Please repeat
+'  end
+
+'(*) --> [添加注释]"First Activity"
+'    -right->判断
+'    --> (*)
+
+'
+'(*) --> "定时任务扫门店所有商品"
+'
+'      -->[D+30为打折期]"筛选出打折期范围内的所有商品,记录其批次（生产日期"
+'
+'      -->"检查表;生成检查单"
+'
+'      -->"jjj"
+'
+'
+'  if " Some Test" then
+'    -->[ture] "Some Activity"
+'    --> "Another Activity"
+'    -right-> (*)
+'  else
+'    -right->[false] "Something else"
+'    -->[Ending process] (*)
+'  endif
+
+
+'
+'scale 640 width
+'
+'[*] --> NotShooting
+'state NotShooting {
+'    [*] --> Idle
+'    Idle --> Processing: SignalEvent
+'    Processing --> Idle: Finish
+'    Idle --> Configuring : EvConfig
+'    Configuring --> Idle : EvConfig
+'}
+'
+'state Configuring {
+'    [*] --> NewValueSelection
+'    NewValueSelection --> NewValuePreview : EvNewValue
+'    NewValuePreview --> NewValueSelection : EvNewValueRejected
+'    NewValuePreview --> NewValueSelection : EvNewValueSaved
+'    state NewValuePreview {
+'        State1 -> State2
+'    }
+'}
+
+@enduml

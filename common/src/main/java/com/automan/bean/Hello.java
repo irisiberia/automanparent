@@ -1,0 +1,1 @@
+package com.automan.bean;/** * @Author he.zhou * @Date 2020-08-18 */public class Hello {}

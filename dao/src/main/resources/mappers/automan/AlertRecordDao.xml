@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.automan.myTest.AlertRecordDao">
+    <resultMap id="BaseResultMap" type="com.automan.bean.ShopSkuSign">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="shop_code" jdbcType="VARCHAR" property="shopCode"/>
+        <result column="sku_code" jdbcType="VARCHAR" property="skuCode"/>
+        <result column="state" jdbcType="BIT" property="state"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, 费用类别	, sku_code, state, updated_time, created_time
+  </sql>
+    <select id="getall" resultType="com.automan.bean.ShopSkuSign">
+        select
+        <include refid="Base_Column_List"/>
+        from shop_sku_sign
+    </select>
+
+
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.List">
+        insert into temperature_alert_record
+        (
+        shop_code,
+        shop_name,
+        mac_address,
+        alert_name
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.shopCode,jdbcType=VARCHAR},
+            #{item.shopName,jdbcType=VARCHAR},
+            #{item.macAddress,jdbcType=VARCHAR},
+            #{item.alertName,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

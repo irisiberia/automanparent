@@ -1,0 +1,52 @@
+
+@startuml
+skinparam handwritten true
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+ArrowColor DeepSkyBlue
+ActorBorderColor DeepSkyBlue
+LifeLineBorderColor blue
+LifeLineBackgroundColor #A9DCDF
+ParticipantBorderColor DeepSkyBlue
+ParticipantBackgroundColor DodgerBlue
+ParticipantFontName Impact
+ParticipantFontSize 17
+ParticipantFontColor #A9DCDF
+ActorBackgroundColor aqua
+ActorFontColor DeepSkyBlue
+ActorFontSize 17
+ActorFontName Aapex
+}
+
+actor user
+participant buffett_bill
+database finance_buffett
+== 新建调整单 ==
+user -> buffett_bill:新建调整单
+buffett_bill -> finance_buffett:
+note right: 表tax_rate_adjust_order
+== 添加商品 ==
+user -> buffett_bill:根据条件查询可以调整的商品列表
+buffett_bill -> finance_buffett: 查询税率错误的商品
+note right:表entity_supplier_product_detail
+user -> user: 选择需要调整的商品
+user -> buffett_bill:添加商品
+buffett_bill -> finance_buffett:落地数据
+note right: 表tax_rate_adjust_product_detail
+== 查询调整单 ==
+user -> buffett_bill:查询调整单列表
+buffett_bill -> finance_buffett:查询调整单
+note right: 表tax_rate_adjust_order
+user -> buffett_bill:查询某条调整单详情
+buffett_bill -> finance_buffett:查询调整明细
+note right:表entity_supplier_product_detail
+== 提交调整单 ==
+user -> buffett_bill:提交调整单
+buffett_bill -> finance_buffett:更改调整单状态
+note right: 表tax_rate_adjust_order
+buffett_bill -[#red]> buffett_bill:根据
+note right: 待定待定
+
+@enduml

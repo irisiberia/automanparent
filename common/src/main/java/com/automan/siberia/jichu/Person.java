@@ -1,0 +1,1 @@
+package com.automan.siberia.jichu;/** * @Author he.zhou * @Date 2020-10-22 */public class Person {    private String code;    public Person(String code) {        this.code = code;    }}

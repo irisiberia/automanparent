@@ -1,0 +1,9 @@
+@startuml
+
+participant "bach-scm-statistic-man" as a
+ participant "bach-crate" as b
+ database "DB" as DB
+ a->DB:查询logistics_sku数据
+ a->b: 组装logistics_sku_dynamic数据
+ b->DB:落库
+@enduml

@@ -1,0 +1,55 @@
+
+@startuml
+participant "bach-vmd-esl"
+participant "bach-vmd-man"
+participant "Queue"
+participant "esl-working"
+participant "电子价签"
+==价签绑定==
+autonumber
+"bach-vmd-man"->"bach-vmd-man":为门店分配eslworking
+"bach-vmd-man"->"esl-working":[http]为门店分配基站
+"bach-vmd-man"->"Queue":绑定：存入队列表中，等待消费
+
+==push==
+autonumber
+->"bach-vmd-esl":商品信息变更mq
+activate "bach-vmd-esl"
+"bach-vmd-esl"->"bach-vmd-esl":mq消息存入队列
+
+group Task|处理mq消息队列
+"bach-vmd-esl"->"bach-vmd-esl":消费队列
+"bach-vmd-esl"->"bach-vmd-man":推送变更消息：ShopWebRemote.push
+activate "bach-vmd-man"
+"bach-vmd-man"->Queue:处理推送消息:SkuChangePushBiz.push
+deactivate "bach-vmd-man"
+activate Queue
+deactivate "bach-vmd-esl"
+end
+
+
+group Task|处理需要推送队列
+Queue->Queue:消费队列
+Queue->"esl-working":[http]批量更新价签
+deactivate Queue
+activate "esl-working"
+"esl-working"->电子价签:下发指令
+"esl-working"->"bach-vmd-man":同步返回通信状态
+deactivate "esl-working"
+deactivate Queue
+end
+
+group 下发回调
+activate "esl-working"
+电子价签->"esl-working":指令执行结果
+activate "esl-working"
+
+
+"esl-working"->"bach-vmd-man":反馈执行结果
+deactivate "esl-working"
+activate "bach-vmd-man"
+"bach-vmd-man"->"bach-vmd-man":根据结果更新价签状态
+deactivate "bach-vmd-man"
+deactivate "bach-vmd-man"
+end
+@enduml

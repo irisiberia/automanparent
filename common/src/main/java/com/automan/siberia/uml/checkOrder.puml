@@ -1,0 +1,95 @@
+@startuml
+autonumber
+
+actor user #red
+actor checkSchedule #yellow
+
+
+
+
+
+== 盘点计划状态流转 ==
+user->Start: 创建盘点计划
+activate Start
+Start->Start:触发生成盘点单actor：\nGenerateCheckOrderByScheduleActor
+Start->Finished:生成所有门店盘点单完成
+deactivate Start
+
+user->Start: 取消盘点计划
+Start->Cancelled: 设置取消状态
+activate Cancelled
+Cancelled->Cancelled: 触发盘点计划取消actor：\nCheckScheduleCancelActor
+Cancelled->Cancelled: 取消所有关联盘点单
+deactivate Cancelled
+
+== 盘点单状态流转 ==
+checkSchedule->Start: 生成盘点单
+activate Start
+Start->Start: 触发actor提前2h生成商品主档\nRecordProductWhenNewCheckOrder
+deactivate Start
+
+user->Start: 开始初盘，增加初盘操作人
+
+activate Start
+Start->Start: 触发actor：ToFirstCheckingActor\n修改单据状态
+Start->FirstChecking: 状态变为"初盘中"
+deactivate Start
+
+activate FirstChecking
+FirstChecking->FirstChecking: 触发actor记录库存快照\nFirstCheckingToRecordInventoryActor
+deactivate FirstChecking
+
+user->FirstChecking: 初盘提交
+
+activate FirstChecking
+FirstChecking->FirstChecking: 触发actor：ToFirstSubmittedActor\n修改单据状态
+FirstChecking->FirstSubmitted: 状态变为"初盘已提交/差异计算中"
+deactivate FirstChecking
+
+activate FirstSubmitted
+FirstSubmitted->FirstSubmitted: 触发actor:\nAfterFirstSubmittedActor
+FirstSubmitted->FirstSubmitted: 初盘提交流水汇总\n
+FirstSubmitted->WaitSecondCheck: 若触发复盘条件，变为"待复盘"
+FirstSubmitted->WaitAdjust: 未触发复盘条件，变为"待调整库存"
+deactivate FirstSubmitted
+
+activate WaitAdjust
+
+user->WaitSecondCheck: 开始复盘，增加复盘操作人
+
+activate WaitSecondCheck
+WaitSecondCheck->WaitSecondCheck: 触发actor：ToSecondCheckingActor\n修改单据状态
+WaitSecondCheck->SecondChecking: 状态变为"复盘中"
+deactivate WaitSecondCheck
+
+user->SecondChecking: 复盘提交
+
+activate SecondChecking
+SecondChecking->SecondChecking: 触发actor：ToSecondSubmittedActor\n修改单据状态
+SecondChecking->SecondSubmitted: 状态变为"复盘已提交"
+deactivate SecondChecking
+
+activate SecondSubmitted
+SecondSubmitted->SecondSubmitted: 触发actor:\nAfterSecondSubmittedActor
+SecondSubmitted->SecondSubmitted: 汇总复盘明细
+SecondSubmitted->WaitAdjust: 状态变为"待调整库存"
+deactivate SecondSubmitted
+
+WaitAdjust->WaitAdjust: 触发actor：AutoFinishedActor
+WaitAdjust->Finished: 若设置了"自动结束盘点"，状态变为"已完成"
+activate Finished
+deactivate WaitAdjust
+
+
+
+user->WaitAdjust: 继续盘点
+
+activate WaitAdjust
+WaitAdjust->FirstChecking: 若单据无复盘，状态变为"初盘中"
+WaitAdjust->SecondChecking: 若单据有复盘，状态变为"复盘中"
+deactivate WaitAdjust
+
+user->WaitAdjust: 结束盘点，改变单据状态
+WaitAdjust->Finished: 触发actor调整库存\nCheckOrderAdjustInventoryActor
+deactivate Finished
+@enduml

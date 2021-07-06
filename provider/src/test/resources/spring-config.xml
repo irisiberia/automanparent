@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--注解扫描-->
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.automan">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+
+    <!-- 引入properties文件:两种方式 -->
+    <context:property-placeholder location="classpath:*.properties" ignore-unresolvable="true"/>
+    <bean id="propertyPlaceHolder" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath*:jdbc.properties</value>
+                <value>classpath:*.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+
+<!--    <bean class="com.automan.siberia.aspect.AspectTest.DataAuthenticationAdvice">-->
+<!--        <property name="authenticators">-->
+<!--            <list>-->
+<!--                <ref bean="methodOrderAuthenticator"/>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+<!--    <bean id="dataQueueOrder" class="com.automan.siberia.workrder.DataQueueOrder"/>-->
+<!--    <bean id="imOnlineQueueOrder" class="com.automan.siberia.workrder.IMOnlineQueueOrder"/>-->
+<!--    <bean id="inRoomQueueOrder" class="com.automan.siberia.workrder.InRoomQueueOrder"/>-->
+<!--    <bean id="delayEnterRoomQueueOrder" class="com.automan.siberia.workrder.DelayEnterRoomQueueOrder"/>-->
+
+
+<!--    <bean id="workOrderTest" class="com.automan.siberia.workrder.WorkOrderTest">-->
+<!--        <property name="queueOrder">-->
+<!--            <list>-->
+<!--                <ref bean="dataQueueOrder"/>-->
+<!--                <ref bean="imOnlineQueueOrder"/>-->
+<!--                <ref bean="inRoomQueueOrder"/>-->
+<!--                <ref bean="delayEnterRoomQueueOrder"/>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+
+    <import resource="classpath*:spring/spring-web.xml"/>
+    <!--<import resource="classpath*:spring/spring-automan-dao.xml"/>-->
+
+    <bean id="personOne" class="com.automan.bean.PersonOne">
+        <constructor-arg index="0" value="34"/>
+        <constructor-arg index="1" value="a"/>
+        <constructor-arg index="2" value="b"/>
+        <constructor-arg index="3" value="c"/>
+    </bean>
+
+    <bean id="testB" class="com.automan.springTest.cirDependency.TestB">
+        <constructor-arg value="2"/>
+    </bean>
+
+    <!--    <bean id="arrange" class="com.automan.siberia.Arrange">-->
+    <!--        <constructor-arg index="0" value="23"/>-->
+    <!--        <constructor-arg index="1" value="343"/>-->
+    <!--    </bean>-->
+
+<!--    <bean class="com.automan.siberia.aspect.logTest.EnvironmentAnnotationBeanPostProcessor"/>-->
+</beans>

@@ -1,0 +1,45 @@
+
+@startuml
+       autonumber
+
+       actor user #red
+
+       user->开始: 创建调拨单
+       activate 开始
+       开始->开始: 触发actor：\nCreateStatusActor判断调拨方式
+       开始->申请处理中: 若为调入方发起
+       开始->调出方处理中: 若为调出方发起
+       deactivate 开始
+
+       user->申请已提交: 调入申请提交
+       activate 申请已提交
+       申请已提交->申请已提交: 触发actor：\nApplyCommittedInventoryActor\n锁定库存
+       申请已提交->申请已提交: 触发actor：\nApplyCommittedSummaryActor\n汇总申请数据并更新单据
+       deactivate 申请已提交
+
+       user->调出方处理中: 调出方确认接单
+       activate 调出方处理中
+       调出方处理中->调出方处理中: 触发actor：\nTransferOutReceiveActor\n获取调出方的货位信息并入库
+       deactivate 调出方处理中
+
+       user->调出方已提交: 调出方提交调拨单
+       activate 调出方已提交
+       调出方已提交->调出方已提交: 触发actor：\nOutCommittedSummaryActor\n汇总调出数据
+       调出方已提交->调出方已提交: 触发actor：\nOutCommittedInventoryActor\n解锁库存并调出库存
+       deactivate 调出方已提交
+
+       user->调入方处理中: 调入方确认接单
+       activate 调入方处理中
+       调入方处理中->调入方处理中: 触发actor：\nTransferInReceiveActor\n记录调入方的货位信息
+       deactivate 调入方处理中
+
+       user->差异待确认: 数量存在差异
+       activate 差异待确认
+       差异待确认->差异待确认: 触发actor：\nWaitConfirmSummaryActor\n汇总调入数量并更新单据
+       deactivate 差异待确认
+
+       user->已完成: 差异确认完成
+       activate 已完成
+       已完成->已完成: 触发actor：\nWaitConfirmToFinishedInventoryActor\n库存操作：商品调入，途损、途盈都改为途返
+       deactivate 已完成
+         @enduml

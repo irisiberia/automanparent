@@ -1,0 +1,36 @@
+@startuml
+
+@startuml
+
+box "jaina" #LightBlue
+ participant ExpirationCheckTask
+end box
+
+box "affair-baseinfo" #LightYellow
+ participant Expire_check
+ participant Expire_remind
+end box
+
+-->ExpirationCheckTask:定时任务获取供应链增量数据
+ExpirationCheckTask-->Expire_check:同步增量数据
+activate ExpirationCheckTask
+deactivate ExpirationCheckTask
+activate Expire_check
+deactivate Expire_check
+
+box "affair-man" #LightBlue
+ participant ExpirationCheckController
+ participant ExpirationCheckBiz
+ participant ExpirationCheckService
+end box
+
+box "affair-core" #LightBlue
+ participant ExpireOrderRemote
+end box
+
+
+
+
+@enduml
+
+@enduml

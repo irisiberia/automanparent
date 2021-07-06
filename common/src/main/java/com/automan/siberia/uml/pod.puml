@@ -1,0 +1,41 @@
+@startuml
+participant "moliere-core" as moliere
+participant "tms" as tms
+box  #F0FFF6
+
+   participant "wms-core" as wms
+   participant "shop-core" as shopcore
+
+participant "shop-man" as shopman
+   participant "baseinfo-core" as baseinfo
+      participant "scm-data-adapter" as adapter
+
+end box
+   participant "affair-core" as affair
+   participant "buffett" as buffett
+
+   participant "inventory" as inventory
+   database "order-store" as store
+    wms -->moliere: 1  配货单下发
+    moliere ->moliere:仓库作业
+alt 当仓库发运时
+    moliere -> wms : 2  仓库发运
+    wms->shopcore:2.1  生pod单
+    shopcore->store:2.1  写入pod单据信息：单据状态为 wait_delivery
+    moliere->wms:2.2  回写仓库实发数
+    wms->baseinfo:2.2  回写仓库实发数
+    moliere->wms:2.3  更新pod单据状态为已发运
+    wms->shopcore: 2.3  pod单据更新为已发运
+    shopcore->store: 2.3  pod单据更新为：delivery
+end
+    tms->tms : 装车 送货
+
+    tms->shopman:3 更新司机信息、司机预计到店时间
+    tms->shopman: 4 司机到店打卡，并包裹收货
+    shopman->baseinfo: 4.1实收数更新
+    shopcore->store: 4.2 pod单据更新为：Finished
+    shopcore->inventory: 4.3 门店 待上架库存更新
+    shopcore -->affair: 4.4 给店务发送 mq
+    affair-> shopcore:4.5 上架库存  门店可用量增加
+    adapter->buffett:4.6 收货明细数
+@enduml

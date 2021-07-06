@@ -1,0 +1,8 @@
+@startuml
+skinparam handwritten true
+
+participant "queue" as q
+participant "invite" as i
+participant "push" as p
+
+@enduml

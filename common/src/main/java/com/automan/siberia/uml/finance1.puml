@@ -1,0 +1,29 @@
+
+@startuml
+skinparam handwritten true
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+
+actor user
+participant svm
+database DB
+
+== 单独提交 ==
+user -> svm: 提交审批
+svm -> DB
+note right:表 flag_rent_bill_title
+== 批量提交 ==
+user -> svm: 批量提交
+svm->svm:校验状态，聚合数据
+alt 非首期
+svm->svm:直接生成账单
+end
+svm->svm:提交审批流
+svm -> DB: 回写状态
+note right:表 flag_rent_bill_title添加字段batch_code
+== 审批流回调==
+-->svm:审批流mq
+svm->svm:根据businessCode判断是批量提交还是单独提交
+svm->DB:回写审审批状态，生成对账
+@enduml
