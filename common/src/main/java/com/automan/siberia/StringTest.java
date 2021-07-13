@@ -1,6 +1,11 @@
 package com.automan.siberia;
 
 public class StringTest {
+    /**
+     * string测试
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         String a = "hello2"; //常量池
         final String b = "hello"; //常量池，
@@ -28,7 +33,7 @@ public class StringTest {
 
         String str3 = "str" + "ing";//常量池中的对象
         String str4 = str1 + str2; //在堆上创建的新的对象
-        String str5 = "string";//常量池中的对象
+        String str5 = "string"; //常量池中的对象
         String str6 = str1 + "ing";
         System.out.println(str3 == str4);//false
         System.out.println(str3 == str5);//true
