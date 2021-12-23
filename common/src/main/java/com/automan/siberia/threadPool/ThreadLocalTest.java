@@ -24,16 +24,13 @@ public class ThreadLocalTest {
     }
 
 
-    ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(5);
+    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
     ScheduledFuture scheduledFuture = scheduledExecutorService.schedule(new Callable() {
-                                                  @Override
-                                                  public Object call() throws Exception {
-                                                      return null;
-                                                  }
-                                              },
-                    5,
-                    TimeUnit.SECONDS);
+        @Override
+        public Object call() throws Exception {
+            return null;
+        }
+    }, 5, TimeUnit.SECONDS);
 
 }

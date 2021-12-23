@@ -18,6 +18,7 @@ public class Number1Test {
     public static final Condition con2 = lock.newCondition();
     public static final Condition con3 = lock.newCondition();
 
+
     public void test1() {
         while (i <= 100) {
             lock.lock();
@@ -41,7 +42,7 @@ public class Number1Test {
     public void test2() {
         while (i <= 100) {
             lock.lock();
-            if (flag ==2) {
+            if (flag == 2) {
                 System.out.println(Thread.currentThread().getName() + "===" + i);
                 i++;
                 flag = 3;
@@ -78,11 +79,54 @@ public class Number1Test {
 
     }
 
-    public static void main(String[] args) {
-        Number1Test number1Test = new Number1Test();
-        new Thread(()->number1Test.test1()).start();
-        new Thread(()->number1Test.test2()).start();
-        new Thread(()->number1Test.test3()).start();
+    public void test4() {
+        while (i <= 100) {
+            synchronized (this) {
+                if (i % 2 == 0) {
+                    System.out.println(Thread.currentThread().getName() + "===" + i);
+                    i++;
+                    notify();
+                } else {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
+    public void test5() {
+        while (i <= 100) {
+            synchronized (this) {
+                if (i % 2 != 0) {
+                    System.out.println(Thread.currentThread().getName() + "===" + i);
+                    i++;
+                    notify();
+                } else {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Number1Test number1Test = new Number1Test();
+        new Thread(number1Test::test4).start();
+        new Thread(number1Test::test5).start();
+//      new Thread(() -> number1Test.test3()).start();
+    }
+
+    /**
+     * synchronized 是基于jvm实现的，通过java 对象头锁定和monitor对象实现的
+     * 对象在内存中主要分为三个部分：
+     * 1.对象头---->markWord  指向类的指针   数组长度
+     * 2.实例数据
+     * 3.对齐填充字节
+     */
 }

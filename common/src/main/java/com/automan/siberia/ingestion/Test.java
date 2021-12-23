@@ -25,8 +25,7 @@ public class Test {
 
 
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("thread-call-runner-%d").build();
-        ExecutorService executorService = new ThreadPoolExecutor(100,100,0L, MILLISECONDS,new LinkedBlockingQueue<Runnable>(),namedThreadFactory);
-
+        ExecutorService executorService = new ThreadPoolExecutor(100,100,0L, MILLISECONDS,new LinkedBlockingQueue<Runnable>(20),namedThreadFactory);
         Collector collector = CollectorFactory.getCollector("hotel.hprice.roomPrice");
         Map map = Maps.newHashMap();
         map.put("sss", "dddd");

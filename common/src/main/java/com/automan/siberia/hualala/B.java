@@ -9,6 +9,7 @@ import java.util.UUID;
  * @date 2019/11/25
  **/
 public class B extends A {
+    @Override
     public void whoAmI() {
         System.out.println(" I am b");
     }

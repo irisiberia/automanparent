@@ -1,7 +1,9 @@
 package com.automan.siberia.sort;
 
+import com.sun.tools.javadoc.Start;
 import lombok.Data;
 
+import java.beans.EventHandler;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Testiii {
     public static void main(String[] args) {
-        int[] arr = new int[]{6, 2, 5, 7, 1, 4, 3};
+        int[] arr = new int[]{6, 1, 2, 7, 9, 3, 4, 5, 10, 8};
 //        erfen(arr);
-        kuaisu(arr, 0, arr.length - 1);
+        kuaisu1(arr, 0, arr.length - 1);
+        System.out.println();
 
         int[] arr2 = new int[]{1, 2, 3, 4, 5, 6, 7};
         System.out.println(erfen2(arr2, 1));
@@ -89,6 +92,18 @@ public class Testiii {
             }
             if (flag) {
                 break;
+            }
+        }
+    }
+
+    public static void maopao(int[] arr) {
+        for (int i = 0; i < arr.length - 1; i++) {
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
             }
         }
     }
@@ -308,7 +323,6 @@ public class Testiii {
      * <p>
      * Max dp[i]=Max{dp[i-1]+arr[i],arr[i]}
      */
-
     public static int getMax333(int[] arr) {
         int max = arr[0];
         int res = arr[0];
@@ -317,6 +331,37 @@ public class Testiii {
             res = Math.max(max, res);
         }
         return res;
+    }
+
+    private static void kuaisu1(int[] arr, int low, int high) {
+        if (low > high) {
+            return;
+        }
+
+        int temp = arr[low];
+        int start = low;
+        int end = high;
+
+        while (start < end) {
+            while (start < end && arr[end] >= temp) {
+                end--;
+            }
+            while (start < end && arr[start] <= temp) {
+                start++;
+            }
+            if (start < end) {
+                int i = arr[start];
+                arr[start] = arr[end];
+                arr[end] = i;
+            }
+        }
+
+        arr[low] = arr[start];
+        arr[start] = temp;
+        kuaisu1(arr, low, start - 1);
+        kuaisu1(arr, start + 1, high);
+
+
     }
 
 

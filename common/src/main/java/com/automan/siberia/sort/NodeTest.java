@@ -2,7 +2,9 @@ package com.automan.siberia.sort;
 
 import com.automan.siberia.Node;
 import com.automan.siberia.sort.treetest.TreeNode;
+import jdk.nashorn.internal.objects.NativeUint8Array;
 
+import java.util.Objects;
 import java.util.Stack;
 
 /**
@@ -261,6 +263,34 @@ public class NodeTest {
             }
         }
         return head;
+    }
+
+
+    public static boolean ishui(Node head) {
+
+        if (head == null || head.getNext() != null) {
+            return false;
+        }
+        Node slow = head;
+        Node quick = head;
+
+        while (quick.getNext() != null) {
+            slow = slow.getNext();
+            quick = quick.getNext().getNext();
+        }
+        Stack<Node> stack = new Stack<>();
+        while (slow.getNext() != null) {
+            stack.push(slow.getNext());
+        }
+        Node cur = head;
+        while (!stack.isEmpty()) {
+            if (!stack.pop().equals(cur)) {
+                return false;
+            }
+            cur = cur.getNext();
+
+        }
+        return true;
     }
 
 }
