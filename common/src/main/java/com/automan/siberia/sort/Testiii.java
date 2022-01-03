@@ -38,12 +38,8 @@ public class Testiii {
         int[] arr6 = new int[]{2, 4, 6, 7};
         System.out.println(Arrays.toString(merge(arr5, arr6)));
 
-        int[] arr7 = new int[]{-1, 5, 6, -3, 9, -7};
+        int[] arr7 = new int[]{-1,2,-3,-4,19,-4};
         System.out.println(getMax333(arr7));
-
-        ConcurrentHashMap hashMap = new ConcurrentHashMap();
-        hashMap.get("33");
-        hashMap.put("2", "33");
 
     }
 

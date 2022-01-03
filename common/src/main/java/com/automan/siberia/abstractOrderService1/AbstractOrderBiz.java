@@ -46,6 +46,7 @@ public abstract class AbstractOrderBiz<T> implements OrderBiz<T> {
 
     }
 
+    @Override
     public T queryByCondition() {
         try {
             Constructor c = clz.getConstructor(Integer.class, String.class);
