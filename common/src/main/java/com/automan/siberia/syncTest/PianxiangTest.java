@@ -2,6 +2,7 @@ package com.automan.siberia.syncTest;
 
 import org.openjdk.jol.info.ClassLayout;
 
+import javax.sound.midi.Soundbank;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +38,32 @@ public class PianxiangTest {
         System.out.println();
         System.out.println("打印t1线程，list中第20个对象的对象头：");
         System.out.println((ClassLayout.parseInstance(listA.get(19)).toPrintable()));
+        System.out.println((ClassLayout.parseInstance(listA.get(18)).toPrintable()));
+
+
+        //创建线程t2竞争线程t1中已经退出同步块的锁
+        Thread t3 = new Thread(() -> {
+            //这里面只循环了30次！！！
+            for (int i = 0; i < 15; i++) {
+                PianxiangTest a = listA.get(i);
+                synchronized (a) {
+                    //分别打印第19次和第20次偏向锁重偏向结果
+                    System.out.println("");
+                }
+            }
+            try {
+                Thread.sleep(10000000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        t3.start();
+
 
         //创建线程t2竞争线程t1中已经退出同步块的锁
         Thread t2 = new Thread(() -> {
             //这里面只循环了30次！！！
-            for (int i = 0; i < 30; i++) {
+            for (int i = 15; i < 30; i++) {
                 PianxiangTest a = listA.get(i);
                 synchronized (a) {
                     //分别打印第19次和第20次偏向锁重偏向结果

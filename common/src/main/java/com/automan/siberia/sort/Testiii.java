@@ -274,7 +274,6 @@ public class Testiii {
     public static void tets11(int[] arr) {
         int start = 0;
         int end = arr.length - 1;
-
         while (start < end) {
             while (start < end && arr[end] % 2 == 0) {
                 end--;
