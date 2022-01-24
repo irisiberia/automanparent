@@ -7,6 +7,4 @@ public interface Subject {
     void deleteMember(Member member);
 
     void notifyToMember();
-
-
 }
