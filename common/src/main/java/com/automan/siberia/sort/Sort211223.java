@@ -208,4 +208,28 @@ public class Sort211223 {
     }
 
 
+    /**
+     * https://blog.csdn.net/weixin_40807247/article/details/91447922
+     *
+     * @param head
+     * @return
+     */
+    private Node getNode(Node head) {
+        Node slow = head;
+        Node quick = head;
+        while (quick != null && quick.getNext() == null) {
+            quick = quick.getNext().getNext();
+            slow = slow.getNext();
+            if (quick == slow) {
+                break;
+            }
+        }
+
+        quick = head;
+        while (quick != slow) {
+            quick = quick.getNext();
+            slow = slow.getNext();
+        }
+        return quick;
+    }
 }
