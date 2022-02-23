@@ -38,7 +38,7 @@ public class Testiii {
         int[] arr6 = new int[]{2, 4, 6, 7};
         System.out.println(Arrays.toString(merge(arr5, arr6)));
 
-        int[] arr7 = new int[]{-1,2,-3,-4,19,-4};
+        int[] arr7 = new int[]{-1, 2, -3, -4, 19, -4};
         System.out.println(getMax333(arr7));
 
     }
@@ -109,12 +109,12 @@ public class Testiii {
         int end = arr.length - 1;
         while (start <= end) {
             int mid = (start + end) / 2;
-            if (arr[mid] > target) {
-                end = mid - 1;
-            } else if (arr[mid] < target) {
-                start = mid + 1;
-            } else {
+            if (arr[mid] == target) {
                 return mid;
+            } else if (arr[mid] > target) {
+                end = mid - 1;
+            } else {
+                start = mid + 1;
             }
         }
         return -1;
@@ -163,8 +163,44 @@ public class Testiii {
         return -1;
     }
 
+    public boolean te(TreeNode node) {
+        if (node == null) {
+            return false;
+        }
+        return isDui(node.getLeft(), node.getRight());
+    }
+
+    public boolean issasasasas(TreeNode node1, TreeNode node2) {
+        if (node1 == null && node2 == null) {
+            return true;
+        }
+        if (node1 == null || node2 == null) {
+            return false;
+        }
+
+        if (node1.getData() != node2.getData()) {
+            return false;
+        }
+        return issasasasas(node1.getLeft(), node2.getLeft()) && issasasasas(node1.getRight(), node2.getLeft());
+
+    }
+
+    public static boolean isDui(TreeNode node1, TreeNode node2) {
+        if (node1 == null && node2 == null) {
+            return true;
+        }
+        if (node1 == null || node2 == null) {
+            return false;
+        }
+
+        if (node1.getData() != node2.getData()) {
+            return false;
+        }
+        return isDui(node1.getLeft(), node2.getRight()) && isDui(node1.getRight(), node2.getLeft());
+    }
+
     /**
-     * 将两个有序链表合并成一个
+     * 将两个有序链表合并成一个有序链表
      */
     public static Node hebing(Node node1, Node node2) {
         if (node1 == null) {
@@ -184,11 +220,16 @@ public class Testiii {
         return prev;
     }
 
+
     /**
      * 判断两个二叉树是否相等
      */
 
     public static boolean iSame(TreeNode node1, TreeNode node2) {
+        if (node1 == null && node2 == null) {
+            return true;
+        }
+
         if (node1 == null || node2 == null) {
             return false;
         }
@@ -212,14 +253,19 @@ public class Testiii {
 
     private static boolean pnduan(TreeNode left, TreeNode right) {
         if (left == null && right == null) {
+            return true;
+        }
+        if (left == null || right == null) {
             return false;
         }
+
         if (left.getData() != right.getData()) {
             return false;
-        } else {
-            return pnduan(left.getLeft(), right.getRight())
-                    && pnduan(left.getRight(), right.getLeft());
         }
+
+        return pnduan(left.getLeft(), right.getRight())
+                && pnduan(left.getRight(), right.getLeft());
+
     }
 
 
@@ -286,6 +332,8 @@ public class Testiii {
                 arr[start] = arr[end];
                 arr[end] = i;
             }
+
+
         }
     }
 
@@ -326,6 +374,33 @@ public class Testiii {
             res = Math.max(max, res);
         }
         return res;
+    }
+
+    private static void kuaisu2(int[] arr, int low, int high) {
+        if (low > high) {
+            return;
+        }
+
+        int temp = arr[low];
+        int start = low;
+        int end = high;
+        while (start < end) {
+            while (start < end && arr[end] > temp) {
+                end--;
+
+            }
+            while (start < end && arr[end] < temp) {
+                end++;
+            }
+            if (start < end) {
+                int i = arr[start];
+                arr[start] = arr[end];
+                arr[end] = i;
+            }
+        }
+
+        arr[low] = arr[start];
+        arr[start] = temp;
     }
 
     private static void kuaisu1(int[] arr, int low, int high) {

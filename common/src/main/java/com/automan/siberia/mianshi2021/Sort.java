@@ -2,6 +2,7 @@ package com.automan.siberia.mianshi2021;
 
 import com.automan.siberia.Node;
 
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
@@ -76,22 +77,30 @@ public class Sort {
     }
 
     /**
-     * 判断是否有环
+     * 获取有环链表的第一个节点
+     * <p>
+     * 第一次相遇时，让quick等于头结点，下次相遇的时候就是环的头几点
      *
      * @param head
      * @return
      */
-    public boolean hasLoop(Node head) {
+    public Node hasLoop(Node head) {
         Node quick = head;
         Node slow = head;
-        while (head != null && quick.getNext() != null) {
+        while (quick != null && quick.getNext() != null) {
             quick = quick.getNext().getNext();
             slow = slow.getNext();
-            if (quick == slow) {
-                return true;
+            if (slow == quick) {
+                break;
             }
         }
-        return false;
+
+        quick = head;
+        while (quick != slow) {
+            quick = quick.getNext();
+            slow = slow.getNext();
+        }
+        return quick;
     }
 
     /**
@@ -104,7 +113,7 @@ public class Sort {
         Node prev = null;
         Node now = head;
         while (now != null) {
-            Node next = now.getNext();
+            Node next = head.getNext();
             now.setNext(prev);
             prev = now;
             now = next;
@@ -144,12 +153,13 @@ public class Sort {
     public Node delete(Node head, int k) {
         Node p1 = head;
         Node p2 = head;
+
         for (int i = 0; i < k - 1 && p1 != null; i++) {
-            p1 = p1.getNext().getNext();
-            p2 = p2.getNext();
+            p1 = p1.getNext();
         }
+
         while (p1 != null) {
-            p1 = p1.getNext().getNext();
+            p1 = p1.getNext();
             p2 = p2.getNext();
         }
         p2.setNext(p2.getNext().getNext());
@@ -171,19 +181,19 @@ public class Sort {
             if (arr[mid] == target) {
                 return mid;
             } else {
-                //mid在右边有序内
-                if (arr[mid] < arr[end]) {
-                    if (arr[mid] < target && arr[end] >= target) {
-                        start = mid + 1;
-                    } else {
-                        end = mid - 1;
-                    }
-                } else {
+                if (arr[mid] > arr[end]) {
                     if (arr[mid] > target && arr[start] <= target) {
                         end = mid - 1;
                     } else {
                         start = mid + 1;
                     }
+                } else {
+                    if (arr[mid] < target && arr[end] >= target) {
+                        start = mid + 1;
+                    } else {
+                        end = mid - 1;
+                    }
+
                 }
             }
         }
@@ -201,9 +211,9 @@ public class Sort {
             int mid = (start + end) / 2;
             if (arr[mid] > arr[mid + 1] && arr[mid] > arr[mid - 1]) {
                 return mid;
-            } else if (arr[mid] > arr[mid - 1]) {
-                start = mid + 1;
             } else if (arr[mid] < arr[mid + 1]) {
+                start = mid + 1;
+            } else {
                 end = mid - 1;
             }
         }
