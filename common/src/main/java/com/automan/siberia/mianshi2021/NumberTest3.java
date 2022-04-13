@@ -2,41 +2,36 @@ package com.automan.siberia.mianshi2021;
 
 /**
  * @Author he.zhou
- * @Date 2021-07-06
+ * @Date 2022-03-07
  */
-public class NumberTest {
-    private static int i = 0;
+public class NumberTest3 {
+    public static int i = 1;
+
+    public void test() {
+        while (i < 100) {
+            synchronized (this) {
+                if (i % 2 == 0) {
+                    System.out.println(Thread.currentThread().getName() + "====" + i);
+                    i++;
+                    notify();
+                } else {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }
+    }
+
 
     public void test1() {
         while (i <= 100) {
             synchronized (this) {
-                if (i % 2 == 0) {
-                    System.out.println(Thread.currentThread().getName() + "=====" + i);
-                    i++;
-                    notify();
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }
-
-    }
-
-    public void test2() {
-        while (i <= 100) {
-            synchronized (this) {
                 if (i % 2 != 0) {
-                    System.out.println(Thread.currentThread().getName() + "=====" + i);
+                    System.out.println(Thread.currentThread().getName() + "====" + i);
                     i++;
                     notify();
                 } else {
@@ -46,14 +41,17 @@ public class NumberTest {
                         e.printStackTrace();
                     }
                 }
+
             }
         }
     }
+
 
     public static void main(String[] args) {
-        NumberTest test = new NumberTest();
+        NumberTest3 numberTest3 = new NumberTest3();
+        new Thread(() -> numberTest3.test()).start();
+        new Thread(() -> numberTest3.test1()).start();
 
-        new Thread(() -> test.test1()).start();
-        new Thread(() -> test.test2()).start();
+
     }
 }

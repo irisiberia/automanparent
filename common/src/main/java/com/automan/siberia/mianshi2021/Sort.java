@@ -153,17 +153,24 @@ public class Sort {
     public Node delete(Node head, int k) {
         Node p1 = head;
         Node p2 = head;
-
-        for (int i = 0; i < k - 1 && p1 != null; i++) {
-            p1 = p1.getNext();
+        int count = 0;
+        while (p1.getNext() != null) {
+            count++;
+            if (count <= k) {
+                p1 = p1.getNext();
+            } else {
+                p1 = p1.getNext();
+                p2 = p2.getNext();
+            }
         }
-
-        while (p1 != null) {
-            p1 = p1.getNext();
-            p2 = p2.getNext();
+        if (head.getNext() == null || count + 1 == k) {
+            head = head.getNext();
+        } else {
+            p1.setNext(p1.getNext().getNext());
         }
-        p2.setNext(p2.getNext().getNext());
         return head;
+
+
     }
 
     /**
